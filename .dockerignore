@@ -1,0 +1,45 @@
+# Eclipse/IntelliJ IDEA project files
+**/.classpath
+**/.project
+**/.settings
+**/.idea
+**/*.iml
+
+# Docker-related files
+**/.dockerignore
+**/Dockerfile*
+**/docker-compose*
+**/compose*
+
+# Git-related files
+**/.git
+**/.gitignore
+
+# Node.js dependencies
+**/node_modules
+**/npm-debug.log
+
+# Maven/Gradle build directories
+**/target
+**/build
+
+# IDE-specific directories
+**/.vscode
+**/.vs
+
+# Environment files
+**/.env
+
+# Logs and temporary files
+**/*.log
+**/*.tmp
+
+# Other unnecessary files
+**/bin
+**/obj
+**/charts
+**/secrets.dev.yaml
+**/values.dev.yaml
+LICENSE
+README.md
+REQUIREMENTS_ANALYSIS.md
