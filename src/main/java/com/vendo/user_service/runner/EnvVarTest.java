@@ -7,19 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class EnvVarTest implements CommandLineRunner {
 
-    @Value("${POSTGRES_URL}")
-    private String postgresUrl;
-
-    @Value("${POSTGRES_USERNAME}")
-    private String postgresUsername;
-
-    @Value("${POSTGRES_PASSWORD}")
-    private String postgresPassword;
+    @Value("${DOTENV_ENABLED:false}")
+    private String dotEnvEnabled;
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("POSTGRES_URL: " + postgresUrl);
-        System.out.println("POSTGRES_USERNAME: " + postgresUsername);
-        System.out.println("POSTGRES_PASSWORD: " + postgresPassword);
+        String messageType = dotEnvEnabled.equals("true") ? "\033[32m.ENV is ENABLED.\033[0m" : "\033[33m.ENV is DISABLED!\033[0m";
+        System.out.println(messageType);
     }
 }
