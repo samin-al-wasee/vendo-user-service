@@ -1,0 +1,48 @@
+name: Set PR Title and Description
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  update-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set PR title and description
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          BRANCH_NAME=$(jq --raw-output .pull_request.head.ref "$GITHUB_EVENT_PATH")
+          
+          # Remove the first number and hyphen from the branch name
+          TITLE=$(echo $BRANCH_NAME | sed 's/^[0-9]*-//')
+
+          # Get issue number from branch name if it exists (assumes branch name format like "1234-issue-description")
+          ISSUE_NUMBER=$(echo $BRANCH_NAME | sed -E 's/^([0-9]+)-.*/\1/')
+
+          if [ -n "$ISSUE_NUMBER" ]; then
+            ISSUE_URL="https://github.com/${{ github.repository }}/issues/${ISSUE_NUMBER}"
+          else
+            ISSUE_URL=""
+          fi
+
+          # Update PR title
+          curl -X PATCH \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"title\":\"$TITLE\"}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER
+
+          # Update PR description
+          if [ -n "$ISSUE_URL" ]; then
+            curl -X PATCH \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              -d "{\"body\":\"Refer to the issue: $ISSUE_URL\"}" \
+              https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER
+          fi
