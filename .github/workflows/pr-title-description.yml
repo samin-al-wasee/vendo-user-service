@@ -5,7 +5,7 @@ on:
     types: [opened]
 
 jobs:
-  update-pr:
+  set-pr-title-description:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,8 +19,8 @@ jobs:
           PR_NUMBER=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           BRANCH_NAME=$(jq --raw-output .pull_request.head.ref "$GITHUB_EVENT_PATH")
           
-          # Remove the first number and hyphen from the branch name
-          TITLE=$(echo $BRANCH_NAME | sed 's/^[0-9]*-//')
+          # Convert branch name to proper sentence
+          TITLE=$(echo $BRANCH_NAME | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
 
           # Get issue number from branch name if it exists (assumes branch name format like "1234-issue-description")
           ISSUE_NUMBER=$(echo $BRANCH_NAME | sed -E 's/^([0-9]+)-.*/\1/')
@@ -30,6 +30,9 @@ jobs:
           else
             ISSUE_URL=""
           fi
+
+          # Construct the description
+          DESCRIPTION="Refer to the issue: [$TITLE]($ISSUE_URL)"
 
           # Update PR title
           curl -X PATCH \
@@ -43,6 +46,6 @@ jobs:
             curl -X PATCH \
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
-              -d "{\"body\":\"Refer to the issue: $ISSUE_URL\"}" \
+              -d "{\"body\":\"$DESCRIPTION\"}" \
               https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER
           fi
